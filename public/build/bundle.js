@@ -49,6 +49,12 @@ var app = (function () {
     function detach(node) {
         node.parentNode.removeChild(node);
     }
+    function destroy_each(iterations, detaching) {
+        for (let i = 0; i < iterations.length; i += 1) {
+            if (iterations[i])
+                iterations[i].d(detaching);
+        }
+    }
     function element(name) {
         return document.createElement(name);
     }
@@ -464,6 +470,15 @@ var app = (function () {
         dispatch_dev('SvelteDOMSetData', { node: text, data });
         text.data = data;
     }
+    function validate_each_argument(arg) {
+        if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
+            let msg = '{#each} only iterates over array-like objects.';
+            if (typeof Symbol === 'function' && arg && Symbol.iterator in arg) {
+                msg += ' You can use a spread to convert this iterable into an array.';
+            }
+            throw new Error(msg);
+        }
+    }
     function validate_slots(name, slot, keys) {
         for (const slot_key of Object.keys(slot)) {
             if (!~keys.indexOf(slot_key)) {
@@ -600,7 +615,94 @@ var app = (function () {
 
     const file$1 = "src\\count.svelte";
 
-    // (12:1) {#if num != 0}
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[12] = list[i];
+    	return child_ctx;
+    }
+
+    // (21:1) {:else}
+    function create_else_block$1(ctx) {
+    	let h1;
+    	let t0;
+    	let t1;
+
+    	const block = {
+    		c: function create() {
+    			h1 = element("h1");
+    			t0 = text(/*name*/ ctx[0]);
+    			t1 = text("님의 순번입니다");
+    			add_location(h1, file$1, 21, 2, 386);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, h1, anchor);
+    			append_dev(h1, t0);
+    			append_dev(h1, t1);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*name*/ 1) set_data_dev(t0, /*name*/ ctx[0]);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(h1);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block$1.name,
+    		type: "else",
+    		source: "(21:1) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (19:1) {#if !(num <= 0)}
+    function create_if_block_2(ctx) {
+    	let h1;
+    	let t0;
+    	let t1;
+    	let t2;
+    	let t3;
+
+    	const block = {
+    		c: function create() {
+    			h1 = element("h1");
+    			t0 = text(/*name*/ ctx[0]);
+    			t1 = text("님, ");
+    			t2 = text(/*num*/ ctx[1]);
+    			t3 = text("명째 기다리는중");
+    			add_location(h1, file$1, 19, 5, 341);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, h1, anchor);
+    			append_dev(h1, t0);
+    			append_dev(h1, t1);
+    			append_dev(h1, t2);
+    			append_dev(h1, t3);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*name*/ 1) set_data_dev(t0, /*name*/ ctx[0]);
+    			if (dirty & /*num*/ 2) set_data_dev(t2, /*num*/ ctx[1]);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(h1);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2.name,
+    		type: "if",
+    		source: "(19:1) {#if !(num <= 0)}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (25:1) {#if !(num <= 0)}
     function create_if_block_1(ctx) {
     	let button0;
     	let t1;
@@ -615,8 +717,8 @@ var app = (function () {
     			t1 = space();
     			button1 = element("button");
     			button1.textContent = "대기열에 -1하기";
-    			add_location(button0, file$1, 12, 2, 250);
-    			add_location(button1, file$1, 13, 2, 307);
+    			add_location(button0, file$1, 25, 2, 443);
+    			add_location(button1, file$1, 26, 2, 500);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button0, anchor);
@@ -625,8 +727,8 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*click_handler*/ ctx[5], false, false, false),
-    					listen_dev(button1, "click", /*click_handler_1*/ ctx[6], false, false, false)
+    					listen_dev(button0, "click", /*click_handler*/ ctx[7], false, false, false),
+    					listen_dev(button1, "click", /*click_handler_1*/ ctx[8], false, false, false)
     				];
 
     				mounted = true;
@@ -646,14 +748,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(12:1) {#if num != 0}",
+    		source: "(25:1) {#if !(num <= 0)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (17:1) {#if num == 0}
+    // (30:1) {#if num <= 0}
     function create_if_block$1(ctx) {
     	let input;
     	let t0;
@@ -667,8 +769,8 @@ var app = (function () {
     			t0 = space();
     			button = element("button");
     			button.textContent = "대기열 추가";
-    			add_location(input, file$1, 17, 2, 390);
-    			add_location(button, file$1, 18, 2, 419);
+    			add_location(input, file$1, 30, 2, 583);
+    			add_location(button, file$1, 31, 2, 612);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -678,8 +780,8 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input, "input", /*input_input_handler*/ ctx[7]),
-    					listen_dev(button, "click", /*click_handler_2*/ ctx[8], false, false, false)
+    					listen_dev(input, "input", /*input_input_handler*/ ctx[9]),
+    					listen_dev(button, "click", /*click_handler_2*/ ctx[10], false, false, false)
     				];
 
     				mounted = true;
@@ -703,7 +805,42 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(17:1) {#if num == 0}",
+    		source: "(30:1) {#if num <= 0}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (37:2) {#each list as n}
+    function create_each_block(ctx) {
+    	let li;
+    	let t_value = /*n*/ ctx[12] + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			li = element("li");
+    			t = text(t_value);
+    			add_location(li, file$1, 37, 3, 711);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, li, anchor);
+    			append_dev(li, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*list*/ 4 && t_value !== (t_value = /*n*/ ctx[12] + "")) set_data_dev(t, t_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(li);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(37:2) {#each list as n}",
     		ctx
     	});
 
@@ -712,94 +849,147 @@ var app = (function () {
 
     function create_fragment$2(ctx) {
     	let main;
-    	let h1;
     	let t0;
     	let t1;
     	let t2;
+    	let ul;
     	let t3;
-    	let t4;
-    	let t5;
-    	let t6;
     	let div;
     	let p;
-    	let if_block0 = /*num*/ ctx[1] != 0 && create_if_block_1(ctx);
-    	let if_block1 = /*num*/ ctx[1] == 0 && create_if_block$1(ctx);
+
+    	function select_block_type(ctx, dirty) {
+    		if (!(/*num*/ ctx[1] <= 0)) return create_if_block_2;
+    		return create_else_block$1;
+    	}
+
+    	let current_block_type = select_block_type(ctx);
+    	let if_block0 = current_block_type(ctx);
+    	let if_block1 = !(/*num*/ ctx[1] <= 0) && create_if_block_1(ctx);
+    	let if_block2 = /*num*/ ctx[1] <= 0 && create_if_block$1(ctx);
+    	let each_value = /*list*/ ctx[2];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
 
     	const block = {
     		c: function create() {
     			main = element("main");
-    			h1 = element("h1");
-    			t0 = text(/*name*/ ctx[0]);
-    			t1 = text("님, ");
-    			t2 = text(/*num*/ ctx[1]);
-    			t3 = text("명째 기다리는중");
-    			t4 = space();
-    			if (if_block0) if_block0.c();
-    			t5 = space();
+    			if_block0.c();
+    			t0 = space();
     			if (if_block1) if_block1.c();
-    			t6 = space();
+    			t1 = space();
+    			if (if_block2) if_block2.c();
+    			t2 = space();
+    			ul = element("ul");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t3 = space();
     			div = element("div");
     			p = element("p");
-    			p.textContent = `${/*year*/ ctx[2]}년 ${/*month*/ ctx[3]}월 ${/*date*/ ctx[4]}일`;
-    			add_location(h1, file$1, 9, 4, 196);
-    			add_location(p, file$1, 22, 2, 490);
-    			add_location(div, file$1, 21, 1, 481);
-    			add_location(main, file$1, 8, 0, 184);
+    			p.textContent = `${/*year*/ ctx[3]}년 ${/*month*/ ctx[4]}월 ${/*date*/ ctx[5]}일`;
+    			add_location(ul, file$1, 35, 1, 681);
+    			add_location(p, file$1, 42, 2, 756);
+    			add_location(div, file$1, 41, 1, 747);
+    			add_location(main, file$1, 16, 0, 306);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, main, anchor);
-    			append_dev(main, h1);
-    			append_dev(h1, t0);
-    			append_dev(h1, t1);
-    			append_dev(h1, t2);
-    			append_dev(h1, t3);
-    			append_dev(main, t4);
-    			if (if_block0) if_block0.m(main, null);
-    			append_dev(main, t5);
+    			if_block0.m(main, null);
+    			append_dev(main, t0);
     			if (if_block1) if_block1.m(main, null);
-    			append_dev(main, t6);
+    			append_dev(main, t1);
+    			if (if_block2) if_block2.m(main, null);
+    			append_dev(main, t2);
+    			append_dev(main, ul);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(ul, null);
+    			}
+
+    			append_dev(main, t3);
     			append_dev(main, div);
     			append_dev(div, p);
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*name*/ 1) set_data_dev(t0, /*name*/ ctx[0]);
-    			if (dirty & /*num*/ 2) set_data_dev(t2, /*num*/ ctx[1]);
-
-    			if (/*num*/ ctx[1] != 0) {
-    				if (if_block0) {
-    					if_block0.p(ctx, dirty);
-    				} else {
-    					if_block0 = create_if_block_1(ctx);
-    					if_block0.c();
-    					if_block0.m(main, t5);
-    				}
-    			} else if (if_block0) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block0) {
+    				if_block0.p(ctx, dirty);
+    			} else {
     				if_block0.d(1);
-    				if_block0 = null;
+    				if_block0 = current_block_type(ctx);
+
+    				if (if_block0) {
+    					if_block0.c();
+    					if_block0.m(main, t0);
+    				}
     			}
 
-    			if (/*num*/ ctx[1] == 0) {
+    			if (!(/*num*/ ctx[1] <= 0)) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
-    					if_block1 = create_if_block$1(ctx);
+    					if_block1 = create_if_block_1(ctx);
     					if_block1.c();
-    					if_block1.m(main, t6);
+    					if_block1.m(main, t1);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
     				if_block1 = null;
+    			}
+
+    			if (/*num*/ ctx[1] <= 0) {
+    				if (if_block2) {
+    					if_block2.p(ctx, dirty);
+    				} else {
+    					if_block2 = create_if_block$1(ctx);
+    					if_block2.c();
+    					if_block2.m(main, t2);
+    				}
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
+    			}
+
+    			if (dirty & /*list*/ 4) {
+    				each_value = /*list*/ ctx[2];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(ul, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
     			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(main);
-    			if (if_block0) if_block0.d();
+    			if_block0.d();
     			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
+    			destroy_each(each_blocks, detaching);
     		}
     	};
 
@@ -823,6 +1013,16 @@ var app = (function () {
     	let month = today.getMonth() + 1;
     	let date = today.getDate();
     	let num = 0;
+    	let list = [];
+
+    	const listPush = () => {
+    		$$invalidate(1, num++, num);
+
+    		if (!list.includes(name)) {
+    			$$invalidate(2, list[list.length] = name, list);
+    		}
+    	};
+
     	const writable_props = ['name'];
 
     	Object.keys($$props).forEach(key => {
@@ -843,22 +1043,32 @@ var app = (function () {
     	}
 
     	const click_handler_2 = () => {
-    		$$invalidate(1, num++, num);
+    		listPush();
     	};
 
     	$$self.$$set = $$props => {
     		if ('name' in $$props) $$invalidate(0, name = $$props.name);
     	};
 
-    	$$self.$capture_state = () => ({ name, today, year, month, date, num });
+    	$$self.$capture_state = () => ({
+    		name,
+    		today,
+    		year,
+    		month,
+    		date,
+    		num,
+    		list,
+    		listPush
+    	});
 
     	$$self.$inject_state = $$props => {
     		if ('name' in $$props) $$invalidate(0, name = $$props.name);
     		if ('today' in $$props) today = $$props.today;
-    		if ('year' in $$props) $$invalidate(2, year = $$props.year);
-    		if ('month' in $$props) $$invalidate(3, month = $$props.month);
-    		if ('date' in $$props) $$invalidate(4, date = $$props.date);
+    		if ('year' in $$props) $$invalidate(3, year = $$props.year);
+    		if ('month' in $$props) $$invalidate(4, month = $$props.month);
+    		if ('date' in $$props) $$invalidate(5, date = $$props.date);
     		if ('num' in $$props) $$invalidate(1, num = $$props.num);
+    		if ('list' in $$props) $$invalidate(2, list = $$props.list);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -868,9 +1078,11 @@ var app = (function () {
     	return [
     		name,
     		num,
+    		list,
     		year,
     		month,
     		date,
+    		listPush,
     		click_handler,
     		click_handler_1,
     		input_input_handler,
